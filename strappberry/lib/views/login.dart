@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:strappberry/models/users_model.dart';
 import '../utils/app_colors.dart';
+import '../controllers/users_controller.dart';
+
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final UsersController usersController;
+
+  const LoginPage({Key? key, required this.usersController}) : super(key: key);
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -19,8 +24,38 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void handleLogin() {
-    Navigator.pushNamed(context, '/product_list');
+ void handleLogin() async {
+    final String email = _emailController.text;
+    final String password = _passwordController.text;
+
+    final List<Users> users = await widget.usersController.getUsers();
+
+    // Cambia el tipo a Users? para permitir valores nulos
+    final Users? user = users.firstWhere(
+      (user) => user.email == email && user.password == password,
+      orElse: () => Users(
+        id: '',
+        name: '',
+        email: '',
+        password: '',
+        isAdmin: false,
+      ),
+    );
+
+    if (user != null && user.id.isNotEmpty) {
+      if(user.isAdmin) {
+        Navigator.pushNamed(context, '/product_list');
+      }else{
+        Navigator.pushNamed(context, '/main_products',arguments: user);
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ahorita no joven')),
+      );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid email or password')),
+      );
+    }
   }
 
   @override
@@ -32,23 +67,23 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: AppColors.primaryColor,
       body: SingleChildScrollView(
         child: Column(
-        children: [
-          // Bloque superior de 29% de la altura
-          Container(
-            height: screenHeight * 0.29,
-            width: double.infinity,
-            child: Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.21), // 21% de padding en el eje x
-                child: const Image(
-                  image: AssetImage('assets/logo.png'),
+          children: [
+            // Bloque superior de 29% de la altura
+            Container(
+              height: screenHeight * 0.29,
+              width: double.infinity,
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.21),
+                  child: const Image(
+                    image: AssetImage('assets/logo.png'),
+                  ),
                 ),
               ),
             ),
-          ),
-          // Bloque inferior de 71% de la altura, rellenando el resto de la pantalla
-          Container(
-              width: double.infinity, // Ancho completo
+            // Bloque inferior de 71% de la altura
+            Container(
+              width: double.infinity,
               height: screenHeight * 0.71,
               decoration: const BoxDecoration(
                 color: AppColors.secondaryColor,
@@ -60,52 +95,45 @@ class _LoginPageState extends State<LoginPage> {
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
                 child: Padding(
-                  padding: EdgeInsets.only(top: screenHeight * 0.05), // Ajustar el padding superior
+                  padding: EdgeInsets.only(top: screenHeight * 0.05),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch, // Asegura que los elementos se estiren horizontalmente
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Campo de Email
                       TextField(
                         controller: _emailController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Email',
                           border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.email, color: AppColors.iconsColor),
                           filled: true,
                           fillColor: AppColors.shadowColor,
                         ),
                       ),
-                      const SizedBox(height: 16.0), // Espacio entre los campos de texto
+                      const SizedBox(height: 16.0),
 
                       // Campo de Contraseña
                       TextField(
                         controller: _passwordController,
-                        decoration: InputDecoration(
+                        obscureText: true,
+                        decoration: const InputDecoration(
                           labelText: 'Contraseña',
                           border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.lock, color: AppColors.iconsColor),
                           filled: true,
                           fillColor: AppColors.shadowColor,
                         ),
-                        obscureText: true,
                       ),
-                      const SizedBox(height: 16.0), // Espacio entre los campos de texto
+                      const SizedBox(height: 16.0),
 
-                      // Botón de Iniciar Sesión
+                      // Botón de Login
                       ElevatedButton(
                         onPressed: handleLogin,
                         style: ElevatedButton.styleFrom(
-                          primary: AppColors.primaryColor, // Fondo del botón
-                          onPrimary: Colors.white, // Color del texto
-                          minimumSize: Size(double.infinity, 50), // Botón de ancho completo
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
+                          primary: AppColors.primaryColor,
+                          onPrimary: Colors.white,
                         ),
                         child: const Text('Iniciar Sesión'),
                       ),
-                      const SizedBox(height: 16.0), // Espacio entre el botón y el texto de registro
-                     const Spacer(),
+                       const Spacer(),
                       // Texto de registro
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -135,9 +163,9 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
-      )
     );
   }
 }

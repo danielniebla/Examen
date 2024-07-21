@@ -1,18 +1,57 @@
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
+import '../controllers/users_controller.dart';
+import '../models/users_model.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+  final UsersController usersController;
+
+  const RegisterPage({
+    Key? key,
+    required this.usersController,
+  }) : super(key: key);
 
   @override
   _RegisterPageState createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmController = TextEditingController();
   bool isAdmin = false; // Estado inicial del checkbox
 
-  void handleRegister() {
-    print('bang bang bang');
+  @override
+  void dispose() {
+    _confirmController.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _registerUser() {
+    if (_nameController.text.isNotEmpty &&
+        _emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty &&
+        _confirmController.text.isNotEmpty &&
+        _passwordController.text == _confirmController.text) {
+      final newUser = Users(
+        id: DateTime.now().toString(), // Generar un ID único
+        name: _nameController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
+        isAdmin: isAdmin,
+      );
+
+      widget.usersController.addUsers(newUser);
+      Navigator.pop(context); // Regresar a la página de inicio de sesión o donde se considere adecuado
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor, complete todos los campos correctamente')),
+      );
+    }
   }
 
   @override
@@ -56,39 +95,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch, // Asegura que los elementos se estiren horizontalmente
                     children: [
-                      const TextField(
-                        decoration: InputDecoration(
-                          labelText: 'Confirmar Contraseña',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.lock, color: AppColors.iconsColor),
-                          filled: true,
-                          fillColor: AppColors.shadowColor,
-                        ),
-                        obscureText: true,
-                      ),
-                      const SizedBox(height: 16.0), // Espacio entre los campos de texto
-                      const TextField(
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.email, color: AppColors.iconsColor),
-                          filled: true,
-                          fillColor: AppColors.shadowColor,
-                        ),
-                      ),
-                      const SizedBox(height: 16.0), // Espacio entre los campos de texto
-                      const TextField(
-                        decoration: InputDecoration(
-                          labelText: 'Contraseña',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.lock, color: AppColors.iconsColor),
-                          filled: true,
-                          fillColor: AppColors.shadowColor,
-                        ),
-                        obscureText: true,
-                      ),
-                      const SizedBox(height: 16.0), // Espacio entre el campo de contraseña y el botón
-                      const TextField(
+                      // Nombre
+                      TextField(
+                        controller: _nameController,
                         decoration: InputDecoration(
                           labelText: 'Nombre',
                           border: OutlineInputBorder(),
@@ -97,7 +106,50 @@ class _RegisterPageState extends State<RegisterPage> {
                           fillColor: AppColors.shadowColor,
                         ),
                       ),
-                      const SizedBox(height: 16.0), // Espacio entre el campo de contraseña y el botón
+                      const SizedBox(height: 16.0),
+
+                      // Email
+                      TextField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.email, color: AppColors.iconsColor),
+                          filled: true,
+                          fillColor: AppColors.shadowColor,
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+
+                      // Contraseña
+                      TextField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: 'Contraseña',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.lock, color: AppColors.iconsColor),
+                          filled: true,
+                          fillColor: AppColors.shadowColor,
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+
+                      // Confirmar Contraseña
+                      TextField(
+                        controller: _confirmController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: 'Confirmar Contraseña',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.lock, color: AppColors.iconsColor),
+                          filled: true,
+                          fillColor: AppColors.shadowColor,
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+
+                      // Checkbox Administrador
                       CheckboxListTile(
                         title: const Text('Administrador'),
                         value: isAdmin,
@@ -107,20 +159,24 @@ class _RegisterPageState extends State<RegisterPage> {
                           });
                         },
                       ),
-                      const SizedBox(height: 16.0), // Espacio entre el checkbox y el botón
+                      const SizedBox(height: 16.0),
+
+                      // Botón de Registro
                       ElevatedButton(
-                        onPressed: handleRegister,
+                        onPressed: _registerUser,
                         style: ElevatedButton.styleFrom(
-                          primary: AppColors.primaryColor, // Fondo del botón
-                          onPrimary: Colors.white, // Color del texto
-                          minimumSize: Size(double.infinity, 50), // Botón de ancho completo
+                          primary: AppColors.primaryColor,
+                          onPrimary: Colors.white,
+                          minimumSize: Size(double.infinity, 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                         ),
                         child: const Text('Registrar'),
                       ),
-                      const SizedBox(height: 16.0), // Espacio entre el botón y el texto de inicio de sesión
+                      const SizedBox(height: 16.0),
+                      const Spacer(),
+                      // Enlace para iniciar sesión
                       const Text(
                         '¿Ya tienes cuenta?',
                         textAlign: TextAlign.center,
@@ -128,14 +184,14 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/');
+                          Navigator.pushNamed(context, '/login');
                         },
                         child: const Text(
                           'Inicia sesión',
                           style: TextStyle(color: AppColors.primaryColor),
                         ),
                       ),
-                      const SizedBox(height: 10.0), // Espacio entre el texto de inicio de sesión y el borde inferior
+                      const SizedBox(height: 10.0),
                     ],
                   ),
                 ),

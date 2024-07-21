@@ -1,19 +1,56 @@
 import '../models/users_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UsersController {
-  final List<Users> _users = [
-    Users(id: '1', name: 'admin',email:'admin@example.com', password:'123',isAdmin: true),
-  ];
+  static const String usersKey = 'users_key';
 
-  List<Users> getCategories() {
-    return List.unmodifiable(_users);
+  Future<List<Users>> _loadUsers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final usersString = prefs.getStringList(usersKey);
+    if (usersString == null || usersString.isEmpty) {
+      // Datos predeterminados si no hay datos en SharedPreferences
+      return [
+        Users(id: '1', name: 'admin', email: 'admin@example.com', password: '123', isAdmin: true),
+      ];
+    }
+    return usersString.map((userString) {
+      final data = userString.split(',');
+      return Users(
+        id: data[0],
+        name: data[1],
+        email: data[2],
+        password: data[3],
+        isAdmin: data[4] == 'true',
+      );
+    }).toList();
   }
 
-  void addUsers(Users users) {
-    _users.add(users);
+  Future<void> _saveUsers(List<Users> users) async {
+    final prefs = await SharedPreferences.getInstance();
+    final usersString = users.map((user) {
+      return '${user.id},${user.name},${user.email},${user.password},${user.isAdmin}';
+    }).toList();
+    prefs.setStringList(usersKey, usersString);
   }
 
-  void removeUsers(String id) {
-    _users.removeWhere((users) => users.id == id);
+  Future<List<Users>> getUsers() async {
+    return _loadUsers();
+  }
+
+  Future<void> addUsers(Users user) async {
+    final currentUsers = await _loadUsers();
+    currentUsers.add(user);
+    await _saveUsers(currentUsers);
+  }
+
+  Future<void> removeUsers(String id) async {
+    final currentUsers = await _loadUsers();
+    currentUsers.removeWhere((user) => user.id == id);
+    await _saveUsers(currentUsers);
+  }
+
+  Future<void> clearUsers() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(usersKey);
   }
 }
