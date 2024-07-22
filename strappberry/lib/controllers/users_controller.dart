@@ -10,13 +10,13 @@ class UsersController {
     if (usersString == null || usersString.isEmpty) {
       // Datos predeterminados si no hay datos en SharedPreferences
       return [
-        Users(id: '1', name: 'admin', email: 'admin@example.com', password: '123', isAdmin: true),
+        Users(id: 1, name: 'admin', email: 'admin@example.com', password: '123', isAdmin: true),
       ];
     }
     return usersString.map((userString) {
       final data = userString.split(',');
       return Users(
-        id: data[0],
+        id: int.parse(data[0]),
         name: data[1],
         email: data[2],
         password: data[3],
@@ -37,9 +37,15 @@ class UsersController {
     return _loadUsers();
   }
 
-  Future<void> addUsers(Users user) async {
+  Future<void> addUsers(NewUsers user) async {
     final currentUsers = await _loadUsers();
-    currentUsers.add(user);
+    currentUsers.add(Users(
+      id: currentUsers.length + 1,
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      isAdmin: user.isAdmin,
+    ));
     await _saveUsers(currentUsers);
   }
 

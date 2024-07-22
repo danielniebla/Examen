@@ -16,40 +16,44 @@ class ProductController {
     if (productsString == null || productsString.isEmpty) {
       return [
         Product(
-          id: '1',
+          id: 1,
           name: 'Smartphone',
           imageUrl: 'assets/logo.png',
           price: 699.99,
           description: 'A high-quality smartphone.',
-          category: 'Electronics',
+          categoryId: 1,
+          sellerId:1
         ),
         Product(
-          id: '2',
+          id: 2,
           name: 'T-shirt',
           imageUrl: 'assets/logo.png',
           price: 19.99,
           description: 'Comfortable cotton t-shirt.',
-          category: 'Clothing',
+          categoryId: 2,
+          sellerId:1
         ),
         Product(
-          id: '3',
+          id: 3,
           name: 'Coffee Maker',
           imageUrl: 'assets/logo.png',
           price: 89.99,
           description: 'A coffee maker with multiple functions.',
-          category: 'Home',
+          categoryId: 3,
+          sellerId:1
         ),
       ];
     }
     return productsString.map((productString) {
       final data = productString.split(',');
       return Product(
-        id: data[0],
+        id: int.parse(data[0]) ,
         name: data[1],
         imageUrl: data[2],
-        price: double.tryParse(data[3]) ?? 0.0,
+        price: double.parse(data[3]),
         description: data[4],
-        category: data[5],
+        categoryId: int.parse(data[5]),
+        sellerId: int.parse(data[6])
       );
     }).toList();
   }
@@ -57,18 +61,26 @@ class ProductController {
   Future<void> _saveProducts(List<Product> products) async {
     final prefs = await SharedPreferences.getInstance();
     final productsString = products.map((product) {
-      return '${product.id},${product.name},${product.imageUrl},${product.price},${product.description},${product.category}';
+      return '${product.id},${product.name},${product.imageUrl},${product.price},${product.description},${product.categoryId},${product.sellerId}';
     }).toList();
     prefs.setStringList(productsKey, productsString);
   }
 
-  Future<void> addProduct(Product product) async {
+  Future<void> addProduct(NewProduct product) async {
     final currentProducts = await _loadProducts();
-    currentProducts.add(product);
+    currentProducts.add(Product(
+        id: currentProducts.length +1, // Unique ID for the new product
+        name: product.name,
+        imageUrl: product.imageUrl, 
+        price:  product.price,
+        description:  product.description,
+        categoryId:  product.categoryId,
+        sellerId: product.sellerId
+      ));
     await _saveProducts(currentProducts);
   }
 
-  Future<void> removeProduct(String id) async {
+  Future<void> removeProduct(int id) async {
     final currentProducts = await _loadProducts();
     currentProducts.removeWhere((product) => product.id == id);
     await _saveProducts(currentProducts);
@@ -88,6 +100,17 @@ class ProductController {
   Future<List<Product>> getProducts() async {
     return _loadProducts();
   }
+  
+ Future<List<Product>> getProductById(int id) async {
+    final products = await _loadProducts();
+    return products.where((product) => product.sellerId == id).toList();
+  }
+
+  Future<List<Product>> getProductByCategory(int id) async {
+    final products = await _loadProducts();
+    return products.where((product) => product.categoryId == id).toList();
+  }
+
 
   Future<List<Category>> getCategories() async {
     return _categoryController.getCategories();

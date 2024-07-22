@@ -37,8 +37,8 @@ class _RegisterPageState extends State<RegisterPage> {
         _passwordController.text.isNotEmpty &&
         _confirmController.text.isNotEmpty &&
         _passwordController.text == _confirmController.text) {
-      final newUser = Users(
-        id: DateTime.now().toString(), // Generar un ID único
+      final newUser = NewUsers(
+        id: null, // Generar un ID único
         name: _nameController.text,
         email: _emailController.text,
         password: _passwordController.text,
@@ -184,7 +184,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/login');
+                          Navigator.pushNamed(context, '/');
                         },
                         child: const Text(
                           'Inicia sesión',

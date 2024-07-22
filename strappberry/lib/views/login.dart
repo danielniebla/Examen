@@ -34,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
     final Users? user = users.firstWhere(
       (user) => user.email == email && user.password == password,
       orElse: () => Users(
-        id: '',
+        id: 0,
         name: '',
         email: '',
         password: '',
@@ -42,13 +42,13 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
 
-    if (user != null && user.id.isNotEmpty) {
+    if (user != null && user.id !=0) {
       if(user.isAdmin) {
-        Navigator.pushNamed(context, '/product_list');
+        Navigator.pushNamed(context, '/product_list',arguments: user);
       }else{
         Navigator.pushNamed(context, '/main_products',arguments: user);
        ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ahorita no joven')),
+        const SnackBar(content: Text('Bienvenido ')),
       );
       }
     } else {

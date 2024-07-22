@@ -3,22 +3,31 @@ import '../../utils/app_colors.dart';
 import '../../controllers/users_controller.dart';
 import '../../models/users_model.dart';
 
-
 class CartPage extends StatefulWidget {
   final UsersController usersController;
 
-  const CartPage({Key? key,
-    required this.usersController,
-  }) : super(key: key);
+  const CartPage({Key? key, required this.usersController}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _CartPageState createState() => _CartPageState();
 }
 
 class _CartPageState extends State<CartPage> {
   late Users user;
-  
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Users) {
+      user = args;
+    } else {
+      // Manejar el caso en el que los argumentos no son válidos
+      // Por ejemplo, redirigir a la página de login
+      Navigator.pushReplacementNamed(context, '/login');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +46,7 @@ class _CartPageState extends State<CartPage> {
                   Card(
                     color: AppColors.secondaryColor,
                     child: ListTile(
-                      leading: Image.asset('assets/product_image.png'),
+                      leading: Image.asset('assets/logo.png'),
                       title: Text(
                         'Macbook M1',
                         style: TextStyle(color: AppColors.primaryColor),

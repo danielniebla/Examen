@@ -5,11 +5,13 @@ import '../../utils/app_colors.dart';
 import '../../models/product_model.dart';
 import '../../controllers/users_controller.dart';
 import '../../models/users_model.dart';
+import '../../models/category_model.dart';
 
 class MainProductsPage extends StatefulWidget {
   final ProductController productController;
   final CategoryController categoryController;
   final UsersController usersController;
+
 
   const MainProductsPage({
     Key? key,
@@ -20,19 +22,40 @@ class MainProductsPage extends StatefulWidget {
 
   @override
   _MainProductsPageState createState() => _MainProductsPageState();
-}
-
-class _MainProductsPageState extends State<MainProductsPage> {
+}class _MainProductsPageState extends State<MainProductsPage> {
   late Users user;
+  late Future<List<Category>> _categoriesFuture; // Variable para almacenar el Future de categorías
+  late Future<List<Product>> _productsFuture; // Variable para almacenar el Future de productos
+  Category? _selectedCategory; // Variable para almacenar la categoría seleccionada
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializar los Futures
+    _categoriesFuture = widget.categoryController.getCategories();
+    _productsFuture = widget.productController.getProducts();
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    user = ModalRoute.of(context)!.settings.arguments as Users;
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Users) {
+      user = args;
+    } else {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
+  }
+
+  void onCategorySelected(Category category) {
+    setState(() {
+      _selectedCategory = category;
+      _productsFuture = widget.productController.getProductByCategory(category.id);
+    });
   }
 
   void addProduct() {
-    Navigator.pushNamed(context, '/add_product');
+    Navigator.pushNamed(context, '/add_product', arguments: user);
   }
 
   @override
@@ -49,79 +72,122 @@ class _MainProductsPageState extends State<MainProductsPage> {
           IconButton(
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
-              // Lógica para navegar a la página del carrito
-              Navigator.pushNamed(context, '/cart');
+              Navigator.pushNamed(
+                context,
+                '/cart',
+                arguments: user,
+              );
             },
             color: AppColors.primaryColor,
           ),
         ],
       ),
       backgroundColor: Colors.white,
-      body: FutureBuilder(
-        future: widget.productController.getProducts(),
-        builder: (context, AsyncSnapshot<List<Product>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: FutureBuilder<List<Category>>(
+        future: _categoriesFuture,
+        builder: (context, AsyncSnapshot<List<Category>> categorySnapshot) {
+          if (categorySnapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (snapshot.hasData) {
-            final products = snapshot.data!;
-            return GridView.builder(
-              padding: const EdgeInsets.all(8.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Número de columnas
-                crossAxisSpacing: 8.0, // Espacio horizontal entre los elementos
-                mainAxisSpacing: 8.0, // Espacio vertical entre los elementos
-              ),
-              itemCount: products.length, // Número de elementos a mostrar
-              itemBuilder: (context, index) {
-                final product = products[index];
-                return Card(
-                  color: AppColors.shadowColor,
-                  child: Column(
-                    children: [
-                      Image.asset(product.imageUrl),
-                      Text(
-                        product.name,
-                        style: const TextStyle(color: AppColors.primaryColor),
-                      ),
-                      Text(
-                        '\$${product.price.toStringAsFixed(2)}',
-                        style: const TextStyle(color: AppColors.shadowColor),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: AppColors.iconsColor),
-                            onPressed: () {
-                              // Lógica para editar
-                            },
+          } else if (categorySnapshot.hasError) {
+            return Center(child: Text('Error: ${categorySnapshot.error}'));
+          } else if (categorySnapshot.hasData) {
+            final categories = categorySnapshot.data!;
+            return Column(
+              children: [
+                // Barra de categorías horizontal
+                Container(
+                  height: 60,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: categories.map((category) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: ElevatedButton(
+                            onPressed: () => onCategorySelected(category),
+                            style: ElevatedButton.styleFrom(
+                              primary: AppColors.secondaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            ),
+                            child: Text(
+                              category.name,
+                              style: const TextStyle(color: Colors.white),
+                            ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: AppColors.iconsColor),
-                            onPressed: () {
-                              widget.productController.removeProduct(product.id);
-                              setState(() {});
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
+                        );
+                      }).toList(),
+                    ),
                   ),
-                );
-              },
+                ),
+                // Grid de productos
+                Expanded(
+                  child: FutureBuilder<List<Product>>(
+                    future: _productsFuture,
+                    builder: (context, AsyncSnapshot<List<Product>> productSnapshot) {
+                      if (productSnapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (productSnapshot.hasError) {
+                        return Center(child: Text('Error: ${productSnapshot.error}'));
+                      } else if (productSnapshot.hasData) {
+                        final products = productSnapshot.data!;
+                        return GridView.builder(
+                          padding: const EdgeInsets.all(8.0),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 8.0,
+                            mainAxisSpacing: 8.0,
+                          ),
+                          itemCount: products.length,
+                          itemBuilder: (context, index) {
+                            final product = products[index];
+                            return Card(
+                              color: AppColors.shadowColor,
+                              child: Column(
+                                children: [
+                                  Image.asset(product.imageUrl),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(4.0),
+                                    margin: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          product.name,
+                                          style: const TextStyle(color: AppColors.primaryColor),
+                                        ),
+                                        Text(
+                                          product.price.toString(),
+                                          style: const TextStyle(color: AppColors.primaryColor),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      } else {
+                        return Center(child: Text('No products found.'));
+                      }
+                    },
+                  ),
+                ),
+              ],
             );
           } else {
-            return Center(child: Text('No products found.'));
+            return Center(child: Text('No categories found.'));
           }
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: addProduct,
-        backgroundColor: AppColors.primaryColor,
-        shape: CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

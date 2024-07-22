@@ -9,15 +9,15 @@ class CategoryController {
     final categoriesString = prefs.getStringList(categoriesKey);
     if (categoriesString == null || categoriesString.isEmpty) {
       return [
-        Category(id: '1', name: 'Electronics'),
-        Category(id: '2', name: 'Clothing'),
-        Category(id: '3', name: 'Home'),
+        Category(id: 1, name: 'Electronics'),
+        Category(id: 2, name: 'Clothing'),
+        Category(id: 3, name: 'Home'),
       ];
     }
     return categoriesString.map((categoryString) {
       final data = categoryString.split(',');
       return Category(
-        id: data[0],
+        id: int.parse(data[0]),
         name: data[1],
       );
     }).toList();
@@ -35,10 +35,12 @@ class CategoryController {
     return _loadCategories();
   }
 
-  Future<void> addCategory(Category category) async {
+  Future<Category> addCategory(NewCategory category) async {
     final currentCategories = await _loadCategories();
-    currentCategories.add(category);
+    final newCategory = Category(id: currentCategories.length+1, name: category.name);
+    currentCategories.add(newCategory);
     await _saveCategories(currentCategories);
+    return (newCategory);
   }
 
   Future<void> removeCategory(String id) async {

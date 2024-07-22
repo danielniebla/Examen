@@ -4,15 +4,21 @@ import '../../controllers/product_controller.dart';
 import '../../controllers/category_controller.dart';
 import '../../models/product_model.dart';
 import '../../models/category_model.dart';
+import '../../controllers/users_controller.dart';
+import '../../models/users_model.dart';
+
+
 
 class AddProductPage extends StatefulWidget {
   final ProductController productController;
   final CategoryController categoryController;
+  final UsersController usersController;
 
   const AddProductPage({
     Key? key,
     required this.productController,
     required this.categoryController,
+    required this.usersController,
   }) : super(key: key);
 
   @override
@@ -23,10 +29,23 @@ class _AddProductPageState extends State<AddProductPage> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _newCategoryController = TextEditingController();
-  String? _selectedCategory;
+  int? _selectedCategory;
   bool _isNewCategory = false;
-  final List<String> _categories = [];
+  final List<Category> _categories = [];
+  late Users user;
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Users) {
+      user = args;
+    } else {
+      // Manejar el caso en el que los argumentos no son válidos
+      // Por ejemplo, redirigir a la página de login
+      Navigator.pushReplacementNamed(context, '/login');
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -36,7 +55,8 @@ class _AddProductPageState extends State<AddProductPage> {
   Future<void> _loadCategories() async {
     final categories = await widget.categoryController.getCategories();
     setState(() {
-      _categories.addAll(categories.map((category) => category.name));
+      _categories.clear();
+      _categories.addAll(categories);
     });
   }
 
@@ -49,42 +69,43 @@ class _AddProductPageState extends State<AddProductPage> {
     super.dispose();
   }
 
-  void _addProduct() {
+  void _addProduct() async {
     if (_nameController.text.isNotEmpty &&
         _priceController.text.isNotEmpty &&
         (_selectedCategory != null || _isNewCategory) &&
         _descriptionController.text.isNotEmpty) {
 
-      String category;
       if (_isNewCategory) {
-        category = _newCategoryController.text;
-        if (category.isNotEmpty) {
-          final newCategory = Category(
-            id: DateTime.now().toString(),
-            name: category,
+        if (_newCategoryController.text.isNotEmpty) {
+          final newCategory = NewCategory(
+            id:null,
+            name: _newCategoryController.text,
           );
-          widget.categoryController.addCategory(newCategory);
+          final Category newCategoryResponse = await widget.categoryController.addCategory(newCategory);  
+
           setState(() {
-            _categories.add(category);
+            _categories.add(newCategoryResponse);
             _isNewCategory = false;
-            _selectedCategory = category;
+            _selectedCategory = newCategoryResponse.id;
             _newCategoryController.clear();
           });
         }
-      } else {
-        category = _selectedCategory ?? '';
+      } 
+      if(user.isAdmin) {
+        final newProduct = NewProduct(
+          id: null, // Unique ID for the new product
+          name: _nameController.text,
+          imageUrl: 'assets/logo.png', 
+          price: double.tryParse(_priceController.text) ?? 0.0,
+          description: _descriptionController.text,
+          categoryId: _selectedCategory ?? 0,
+          sellerId: user.id
+        );
+
+        widget.productController.addProduct(newProduct);
+
       }
 
-      final newProduct = Product(
-        id: DateTime.now().toString(), // Unique ID for the new product
-        name: _nameController.text,
-        imageUrl: 'assets/logo.png', 
-        price: double.tryParse(_priceController.text) ?? 0.0,
-        description: _descriptionController.text,
-        category: category,
-      );
-
-      widget.productController.addProduct(newProduct);
 
       Navigator.pop(context);
     } else {
@@ -114,9 +135,6 @@ class _AddProductPageState extends State<AddProductPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (snapshot.hasData) {
-            final categories = snapshot.data!;
-            _categories.clear();
-            _categories.addAll(categories.map((category) => category.name));
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -167,23 +185,23 @@ class _AddProductPageState extends State<AddProductPage> {
                     ),
                   ),
                   const SizedBox(height: 16.0),
-                  DropdownButtonFormField<String>(
+                  DropdownButtonFormField<int>(
                     value: _selectedCategory,
                     hint: const Text('Selecciona una categoría'),
                     items: _categories.map((category) {
                       return DropdownMenuItem(
-                        value: category,
-                        child: Text(category),
+                        value: category.id,
+                        child: Text(category.name),
                       );
                     }).toList()
                       ..add(
                         const DropdownMenuItem(
-                          value: 'other',
+                          value: 0,
                           child: Text('Otra'),
                         ),
                       ),
                     onChanged: (value) {
-                      if (value == 'other') {
+                      if (value == 0) {
                         setState(() {
                           _isNewCategory = true;
                           _selectedCategory = null;

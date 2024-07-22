@@ -28,6 +28,7 @@ class AppModule extends Module {
     ChildRoute('/product_list', child: (_, __) => ProductListPage(
       productController: Modular.get<ProductController>(),
       categoryController: Modular.get<CategoryController>(),
+      usersController: Modular.get<UsersController>(),
     )),
     ChildRoute('/main_products', child: (_, __) => MainProductsPage(
       productController: Modular.get<ProductController>(),
@@ -37,11 +38,12 @@ class AppModule extends Module {
     ChildRoute('/add_product', child: (_, __) => AddProductPage(
       productController: Modular.get<ProductController>(),
       categoryController: Modular.get<CategoryController>(),
+      usersController: Modular.get<UsersController>(),
     )),
-     ChildRoute('/cart', child: (_, __) => CartPage(
-            usersController: Modular.get<UsersController>(),
+    ChildRoute('/cart', child: (_, __) => CartPage(
+      usersController: Modular.get<UsersController>(),
+    )),
 
-     ))
 
   ];
 
