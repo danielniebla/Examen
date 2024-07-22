@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../controllers/product_controller.dart';
 import '../../controllers/category_controller.dart';
+import '../../controllers/users_controller.dart';
 import '../../utils/app_colors.dart';
 import '../../models/product_model.dart';
-import '../../controllers/users_controller.dart';
 import '../../models/users_model.dart';
 
 class ProductListPage extends StatefulWidget {
   final ProductController productController;
   final CategoryController categoryController;
-    final UsersController usersController;
-
+  final UsersController usersController;
 
   const ProductListPage({
     Key? key,
@@ -22,24 +21,18 @@ class ProductListPage extends StatefulWidget {
   @override
   _ProductListPageState createState() => _ProductListPageState();
 }
-class _ProductListPageState extends State<ProductListPage> {
-    late Users user;
 
-  void addProduct() {
-    Navigator.pushNamed(context, '/add_product',arguments: user );
+class _ProductListPageState extends State<ProductListPage> {
+  late Future<Users?> _currentUserFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentUserFuture = widget.usersController.getCurrentUser();
   }
 
-    @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Users) {
-      user = args;
-    } else {
-      // Manejar el caso en el que los argumentos no son válidos
-      // Por ejemplo, redirigir a la página de login
-      Navigator.pushReplacementNamed(context, '/login');
-    }
+  void addProduct() {
+    Navigator.pushNamed(context, '/add_product');
   }
 
   @override
@@ -54,63 +47,81 @@ class _ProductListPageState extends State<ProductListPage> {
         foregroundColor: Colors.white,
       ),
       backgroundColor: Colors.white,
-      body: FutureBuilder(
-        future: widget.productController.getProductBySellerId(user.id),
-        builder: (context, AsyncSnapshot<List<Product>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: FutureBuilder<Users?>(
+        future: _currentUserFuture,
+        builder: (context, userSnapshot) {
+          if (userSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (snapshot.hasData) {
-            final products = snapshot.data!;
-            return GridView.builder(
-              padding: const EdgeInsets.all(8.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Número de columnas
-                crossAxisSpacing: 8.0, // Espacio horizontal entre los elementos
-                mainAxisSpacing: 8.0, // Espacio vertical entre los elementos
-              ),
-              itemCount: products.length, // Número de elementos a mostrar
-              itemBuilder: (context, index) {
-                final product = products[index];
-                return Card(
-                  color: AppColors.shadowColor,
-                  child: Column(
-                    children: [
-                      Image.asset(product.imageUrl),
-                      Text(
-                        product.name,
-                        style: const TextStyle(color: AppColors.primaryColor),
-                      ),
-                      Text(
-                        product.price.toString(),
-                        style: const TextStyle(color: AppColors.primaryColor),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: AppColors.iconsColor),
-                            onPressed: () {
-                              // Lógica para editar
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: AppColors.iconsColor),
-                            onPressed: () {
-                              widget.productController.removeProduct(product.id);
-                              setState(() {});
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
+          } else if (userSnapshot.hasError) {
+            return Center(child: Text('Error: ${userSnapshot.error}'));
+          } else if (userSnapshot.hasData) {
+            final user = userSnapshot.data;
+            if (user == null) {
+              return Center(child: Text('No user found.'));
+            }
+
+            return FutureBuilder<List<Product>>(
+              future: widget.productController.getProductBySellerId(user.id),
+              builder: (context, productSnapshot) {
+                if (productSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (productSnapshot.hasError) {
+                  return Center(child: Text('Error: ${productSnapshot.error}'));
+                } else if (productSnapshot.hasData) {
+                  final products = productSnapshot.data!;
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(8.0),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 8.0,
+                      mainAxisSpacing: 8.0,
+                    ),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return Card(
+                        color: AppColors.shadowColor,
+                        child: Column(
+                          children: [
+                            Image.asset(product.imageUrl),
+                            Text(
+                              product.name,
+                              style: const TextStyle(color: AppColors.primaryColor),
+                            ),
+                            Text(
+                              product.price.toString(),
+                              style: const TextStyle(color: AppColors.primaryColor),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit, color: AppColors.iconsColor),
+                                  onPressed: () {
+                                    // Lógica para editar
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: AppColors.iconsColor),
+                                  onPressed: () {
+                                    widget.productController.removeProduct(product.id);
+                                    setState(() {});
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  return Center(child: Text('No products found.'));
+                }
               },
             );
           } else {
-            return Center(child: Text('No products found.'));
+            return Center(child: Text('No user found.'));
           }
         },
       ),

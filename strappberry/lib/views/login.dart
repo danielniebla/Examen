@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:strappberry/models/users_model.dart';
 import '../utils/app_colors.dart';
 import '../controllers/users_controller.dart';
-
+import '../models/users_model.dart';
 
 class LoginPage extends StatefulWidget {
   final UsersController usersController;
@@ -28,29 +28,25 @@ class _LoginPageState extends State<LoginPage> {
     final String email = _emailController.text;
     final String password = _passwordController.text;
 
-    final List<Users> users = await widget.usersController.getUsers();
+    final bool login = await widget.usersController.login(email, password);
 
-    // Cambia el tipo a Users? para permitir valores nulos
-    final Users? user = users.firstWhere(
-      (user) => user.email == email && user.password == password,
-      orElse: () => Users(
-        id: 0,
-        name: '',
-        email: '',
-        password: '',
-        isAdmin: false,
-      ),
-    );
-
-    if (user != null && user.id !=0) {
-      if(user.isAdmin) {
-        Navigator.pushNamed(context, '/product_list',arguments: user);
+    if (login) {
+      final Users? user = await widget.usersController.getCurrentUser();
+      if (user != null) {
+        if(user.isAdmin) {
+          Navigator.pushNamed(context, '/product_list');
+        }else{
+          Navigator.pushNamed(context, '/main_products');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Bienvenido ')),
+        );
+        }
       }else{
-        Navigator.pushNamed(context, '/main_products',arguments: user);
-       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bienvenido ')),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al iniciar sesión')),
+        );
       }
+
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid email or password')),

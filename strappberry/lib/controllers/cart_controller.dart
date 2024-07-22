@@ -37,11 +37,22 @@ class CartController {
     prefs.setStringList(cartKey, cartString);
   }
 
-  Future<void> addToCart(CartItem cartItem) async {
+ Future<void> addToCart(NewCartItem newCartItem) async {
     final currentCartItems = await _loadCartItems();
+    // Generar un nuevo ID para el nuevo cartItem
+    final newId = (currentCartItems.isNotEmpty) ? currentCartItems.last.id + 1 : 1;
+    
+    final cartItem = CartItem(
+      id: newId,
+      userId: newCartItem.userId,
+      productId: newCartItem.productId,
+      quantity: newCartItem.quantity,
+    );
+    
     currentCartItems.add(cartItem);
     await _saveCartItems(currentCartItems);
   }
+
 
   Future<void> removeFromCart(String cartItemId) async {
     final currentCartItems = await _loadCartItems();

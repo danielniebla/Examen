@@ -45,7 +45,7 @@ class _RegisterPageState extends State<RegisterPage> {
         isAdmin: isAdmin,
       );
 
-      widget.usersController.addUsers(newUser);
+      widget.usersController.register(newUser);
       Navigator.pop(context); // Regresar a la página de inicio de sesión o donde se considere adecuado
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

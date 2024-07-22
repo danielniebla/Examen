@@ -35,17 +35,14 @@ class _AddProductPageState extends State<AddProductPage> {
   late Users user;
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     super.didChangeDependencies();
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Users) {
-      user = args;
-    } else {
-      // Manejar el caso en el que los argumentos no son válidos
-      // Por ejemplo, redirigir a la página de login
+      final Users? user = await widget.usersController.getCurrentUser();
+    if (user == null) {
       Navigator.pushReplacementNamed(context, '/login');
-    }
+    } 
   }
+  
   @override
   void initState() {
     super.initState();

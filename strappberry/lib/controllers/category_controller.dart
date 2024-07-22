@@ -37,7 +37,7 @@ class CategoryController {
 
   Future<Category> addCategory(NewCategory category) async {
     final currentCategories = await _loadCategories();
-    final newCategory = Category(id: currentCategories.length+1, name: category.name);
+    final newCategory = Category(id:(currentCategories.isNotEmpty)? currentCategories.length+1:1, name: category.name);
     currentCategories.add(newCategory);
     await _saveCategories(currentCategories);
     return (newCategory);

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../controllers/product_controller.dart';
 import '../../controllers/category_controller.dart';
+import '../../controllers/users_controller.dart';
 import '../../utils/app_colors.dart';
 import '../../models/product_model.dart';
-import '../../controllers/users_controller.dart';
-import '../../models/users_model.dart';
 import '../../models/category_model.dart';
+import '../../models/users_model.dart';
 
 class MainProductsPage extends StatefulWidget {
   final ProductController productController;
@@ -24,7 +24,7 @@ class MainProductsPage extends StatefulWidget {
 }
 
 class _MainProductsPageState extends State<MainProductsPage> {
-  late Users user;
+  late Future<Users?> _currentUserFuture; // Variable para almacenar el Future del usuario
   late Future<List<Category>> _categoriesFuture; // Variable para almacenar el Future de categorías
   late Future<List<Product>> _productsFuture; // Variable para almacenar el Future de productos
   Category? _selectedCategory; // Variable para almacenar la categoría seleccionada
@@ -34,19 +34,9 @@ class _MainProductsPageState extends State<MainProductsPage> {
   void initState() {
     super.initState();
     // Inicializar los Futures
+    _currentUserFuture = widget.usersController.getCurrentUser();
     _categoriesFuture = widget.categoryController.getCategories();
     _productsFuture = widget.productController.getProducts();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Users) {
-      user = args;
-    } else {
-      Navigator.pushReplacementNamed(context, '/login');
-    }
   }
 
   void onCategorySelected(Category category) {
@@ -72,9 +62,23 @@ class _MainProductsPageState extends State<MainProductsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Hola ${user.name}',
-          style: TextStyle(color: AppColors.primaryColor),
+        title: FutureBuilder<Users?>(
+          future: _currentUserFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Text('Hola...');
+            } else if (snapshot.hasError) {
+              return Text('Error');
+            } else if (snapshot.hasData) {
+              final user = snapshot.data;
+              return Text(
+                'Hola ${user?.name ?? 'User'}',
+                style: TextStyle(color: AppColors.primaryColor),
+              );
+            } else {
+              return Text('Hola');
+            }
+          },
         ),
         backgroundColor: AppColors.secondaryColor,
         foregroundColor: AppColors.primaryColor,
@@ -82,11 +86,7 @@ class _MainProductsPageState extends State<MainProductsPage> {
           IconButton(
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
-              Navigator.pushNamed(
-                context,
-                '/cart',
-                arguments: user,
-              );
+              Navigator.pushNamed(context, '/cart');
             },
             color: AppColors.primaryColor,
           ),
@@ -95,7 +95,7 @@ class _MainProductsPageState extends State<MainProductsPage> {
       backgroundColor: Colors.white,
       body: FutureBuilder<List<Category>>(
         future: _categoriesFuture,
-        builder: (context, AsyncSnapshot<List<Category>> categorySnapshot) {
+        builder: (context, categorySnapshot) {
           if (categorySnapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (categorySnapshot.hasError) {
@@ -137,7 +137,7 @@ class _MainProductsPageState extends State<MainProductsPage> {
                 Expanded(
                   child: FutureBuilder<List<Product>>(
                     future: _productsFuture,
-                    builder: (context, AsyncSnapshot<List<Product>> productSnapshot) {
+                    builder: (context, productSnapshot) {
                       if (productSnapshot.connectionState == ConnectionState.waiting) {
                         return Center(child: CircularProgressIndicator());
                       } else if (productSnapshot.hasError) {
@@ -154,38 +154,43 @@ class _MainProductsPageState extends State<MainProductsPage> {
                           itemCount: products.length,
                           itemBuilder: (context, index) {
                             final product = products[index];
-                            return Card(
-                              color: AppColors.shadowColor,
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.all(4.0),
-                                    child: Image.asset(product.imageUrl),
-                                  ),
-                                  Spacer(),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12.0),
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, '/productDetails');
+                              },
+                              child: Card(
+                                color: AppColors.shadowColor,
+                                child: Column(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.all(4.0),
+                                      child: Image.asset(product.imageUrl),
                                     ),
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.all(4.0),
-                                    margin: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          product.name,
-                                          style: const TextStyle(color: AppColors.primaryColor),
-                                        ),
-                                        Text(
-                                          product.price.toString(),
-                                          style: const TextStyle(color: AppColors.primaryColor),
-                                        ),
-                                      ],
+                                    Spacer(),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12.0),
+                                      ),
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.all(4.0),
+                                      margin: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            product.name,
+                                            style: const TextStyle(color: AppColors.primaryColor),
+                                          ),
+                                          Text(
+                                            product.price.toString(),
+                                            style: const TextStyle(color: AppColors.primaryColor),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             );
                           },

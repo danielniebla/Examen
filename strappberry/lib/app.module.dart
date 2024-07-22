@@ -3,12 +3,16 @@ import '/controllers/product_controller.dart';
 import '/controllers/category_controller.dart';
 import '/controllers/users_controller.dart';
 import '/controllers/cart_controller.dart';
-import '/views/login.dart';
-import '/views/register.dart';
+import 'views/login.dart';
+import 'views/register.dart';
 import 'views/admin/product_list.dart';
 import 'views/admin/add_product.dart';
 import 'views/client/main_products.dart';
 import 'views/client/cart.dart';
+import 'views/client/details.dart';
+import 'models/product_model.dart';
+import 'models/users_model.dart';
+
 
 class AppModule extends Module {
   @override
@@ -16,7 +20,6 @@ class AppModule extends Module {
     Bind.singleton((i) => CategoryController()),
     Bind.singleton((i) => ProductController(i.get<CategoryController>())),
     Bind.singleton((i) => UsersController()),
-    // Pasar el ProductController al CartController
     Bind.singleton((i) => CartController(i.get<ProductController>())),
   ];
 
@@ -48,5 +51,10 @@ class AppModule extends Module {
       productController: Modular.get<ProductController>(),
       cartController: Modular.get<CartController>(),
     )),
+    ChildRoute('/details', child: (_, __) => DetailsPage(
+      productController: Modular.get<ProductController>(),
+      usersController: Modular.get<UsersController>(),
+    )),
+
   ];
 }

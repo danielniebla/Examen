@@ -21,26 +21,22 @@ class CartPage extends StatefulWidget {
   @override
   _CartPageState createState() => _CartPageState();
 }
+
 class _CartPageState extends State<CartPage> {
-  late Users user;
-  late Future<List<CartProduct>> _cartProductsFuture;
+  Future<List<CartProduct>>? _cartProductsFuture;
   Map<int, int> productQuantities = {};
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Users) {
-      user = args;
-      _cartProductsFuture = widget.cartController.getCartItemsByUserId(user.id.toString(), widget.productController);
-      _cartProductsFuture.then((cartProducts) {
-        setState(() {
-          for (var product in cartProducts) {
-            if (!productQuantities.containsKey(product.id)) {
-              productQuantities[product.id] = product.quantity;
-            }
-          }
-        });
+  void initState() {
+    super.initState();
+    _initializeCart();
+  }
+
+  Future<void> _initializeCart() async {
+    final user = await widget.usersController.getCurrentUser();
+    if (user != null) {
+      setState(() {
+        _cartProductsFuture = widget.cartController.getCartItemsByUserId(user.id.toString(), widget.productController);
       });
     } else {
       Navigator.pushReplacementNamed(context, '/login');
@@ -52,6 +48,14 @@ class _CartPageState extends State<CartPage> {
 
     // Actualizar la cantidad en el controlador
     await widget.cartController.updateQuantity(product.id, delta);
+
+    // Recargar los datos del carrito
+    final user = await widget.usersController.getCurrentUser();
+    if (user != null) {
+      setState(() {
+        _cartProductsFuture = widget.cartController.getCartItemsByUserId(user.id.toString(), widget.productController);
+      });
+    }
 
     // Actualizar el estado local
     setState(() {
@@ -108,8 +112,8 @@ class _CartPageState extends State<CartPage> {
                                       padding: EdgeInsets.all(8.0),
                                       child: Image.asset(
                                         product.imageUrl,
-                                        height: 100, // Adjust as needed
-                                        width: 100, // Adjust as needed
+                                        height: 100,
+                                        width: 100,
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -190,8 +194,8 @@ class _CartPageState extends State<CartPage> {
                             // Handle checkout logic
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: AppColors.primaryColor, // Background color
-                            onPrimary: Colors.white, // Text color
+                            primary: AppColors.primaryColor,
+                            onPrimary: Colors.white,
                           ),
                           child: Text('Comprar ahora'),
                         ),

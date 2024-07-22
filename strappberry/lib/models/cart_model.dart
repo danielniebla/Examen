@@ -11,6 +11,21 @@ class CartItem {
     required this.quantity,
   });
 }
+
+class NewCartItem {
+  final int? id;
+  final int userId;
+  final int productId;
+  final int quantity;
+
+  NewCartItem({
+    required this.id,
+    required this.userId,
+    required this.productId,
+    required this.quantity,
+  });
+}
+
 class CartProduct{
   final int id;
   final String name;
@@ -32,19 +47,5 @@ class CartProduct{
     required this.sellerId,
     required this.quantity,
 
-  });
-}
-
-class NewCartItem {
-  final int? id;
-  final int userId;
-  final int productId;
-  final int quantity;
-
-  NewCartItem({
-    required this.id,
-    required this.userId,
-    required this.productId,
-    required this.quantity,
   });
 }
