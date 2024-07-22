@@ -55,7 +55,7 @@ class _ProductListPageState extends State<ProductListPage> {
       ),
       backgroundColor: Colors.white,
       body: FutureBuilder(
-        future: widget.productController.getProductById(user.id),
+        future: widget.productController.getProductBySellerId(user.id),
         builder: (context, AsyncSnapshot<List<Product>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -84,7 +84,7 @@ class _ProductListPageState extends State<ProductListPage> {
                       ),
                       Text(
                         product.price.toString(),
-                        style: const TextStyle(color: AppColors.shadowColor),
+                        style: const TextStyle(color: AppColors.primaryColor),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

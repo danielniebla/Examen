@@ -101,9 +101,13 @@ class ProductController {
     return _loadProducts();
   }
   
- Future<List<Product>> getProductById(int id) async {
+ Future<List<Product>> getProductBySellerId(int id) async {
     final products = await _loadProducts();
     return products.where((product) => product.sellerId == id).toList();
+  }
+  Future<List<Product>> getProductById(int id) async {
+    final products = await _loadProducts();
+    return products.where((product) => product.id == id).toList();
   }
 
   Future<List<Product>> getProductByCategory(int id) async {

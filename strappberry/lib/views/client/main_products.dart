@@ -12,7 +12,6 @@ class MainProductsPage extends StatefulWidget {
   final CategoryController categoryController;
   final UsersController usersController;
 
-
   const MainProductsPage({
     Key? key,
     required this.productController,
@@ -22,11 +21,14 @@ class MainProductsPage extends StatefulWidget {
 
   @override
   _MainProductsPageState createState() => _MainProductsPageState();
-}class _MainProductsPageState extends State<MainProductsPage> {
+}
+
+class _MainProductsPageState extends State<MainProductsPage> {
   late Users user;
   late Future<List<Category>> _categoriesFuture; // Variable para almacenar el Future de categorías
   late Future<List<Product>> _productsFuture; // Variable para almacenar el Future de productos
   Category? _selectedCategory; // Variable para almacenar la categoría seleccionada
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -54,8 +56,16 @@ class MainProductsPage extends StatefulWidget {
     });
   }
 
-  void addProduct() {
-    Navigator.pushNamed(context, '/add_product', arguments: user);
+  void onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+      if (index == 0) {
+        // Reiniciar filtro al ir a la pestaña Home
+        _selectedCategory = null;
+        _productsFuture = widget.productController.getProducts();
+      }
+      // Aquí podrías agregar lógica adicional para otras pestañas si es necesario
+    });
   }
 
   @override
@@ -103,19 +113,19 @@ class MainProductsPage extends StatefulWidget {
                     child: Row(
                       children: categories.map((category) {
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: ElevatedButton(
                             onPressed: () => onCategorySelected(category),
                             style: ElevatedButton.styleFrom(
                               primary: AppColors.secondaryColor,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
+                                borderRadius: BorderRadius.circular(10.0),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              padding: const EdgeInsets.symmetric(horizontal: 20.0),
                             ),
                             child: Text(
                               category.name,
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(fontSize: 18, color: Colors.black),
                             ),
                           ),
                         );
@@ -148,7 +158,11 @@ class MainProductsPage extends StatefulWidget {
                               color: AppColors.shadowColor,
                               child: Column(
                                 children: [
-                                  Image.asset(product.imageUrl),
+                                  Padding(
+                                    padding: EdgeInsets.all(4.0),
+                                    child: Image.asset(product.imageUrl),
+                                  ),
+                                  Spacer(),
                                   Container(
                                     decoration: BoxDecoration(
                                       color: Colors.white,
@@ -188,6 +202,24 @@ class MainProductsPage extends StatefulWidget {
             return Center(child: Text('No categories found.'));
           }
         },
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: onTabTapped,
+        currentIndex: _currentIndex,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Favorite',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'User',
+          ),
+        ],
       ),
     );
   }

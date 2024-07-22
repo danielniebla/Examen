@@ -11,6 +11,7 @@ class UsersController {
       // Datos predeterminados si no hay datos en SharedPreferences
       return [
         Users(id: 1, name: 'admin', email: 'admin@example.com', password: '123', isAdmin: true),
+        Users(id: 2, name: 'olaph', email: 'hola@hola.com', password: '123', isAdmin: false),
       ];
     }
     return usersString.map((userString) {

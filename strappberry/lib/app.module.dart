@@ -2,6 +2,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import '/controllers/product_controller.dart';
 import '/controllers/category_controller.dart';
 import '/controllers/users_controller.dart';
+import '/controllers/cart_controller.dart';
 import '/views/login.dart';
 import '/views/register.dart';
 import 'views/admin/product_list.dart';
@@ -15,6 +16,8 @@ class AppModule extends Module {
     Bind.singleton((i) => CategoryController()),
     Bind.singleton((i) => ProductController(i.get<CategoryController>())),
     Bind.singleton((i) => UsersController()),
+    // Pasar el ProductController al CartController
+    Bind.singleton((i) => CartController(i.get<ProductController>())),
   ];
 
   @override
@@ -42,9 +45,8 @@ class AppModule extends Module {
     )),
     ChildRoute('/cart', child: (_, __) => CartPage(
       usersController: Modular.get<UsersController>(),
+      productController: Modular.get<ProductController>(),
+      cartController: Modular.get<CartController>(),
     )),
-
-
   ];
-
 }
