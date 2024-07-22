@@ -12,6 +12,8 @@ import 'views/client/cart.dart';
 import 'views/client/details.dart';
 import 'models/product_model.dart';
 import 'models/users_model.dart';
+import 'views/client/likeds.dart';
+import 'controllers/likeds_controller.dart';
 
 
 class AppModule extends Module {
@@ -21,6 +23,7 @@ class AppModule extends Module {
     Bind.singleton((i) => ProductController(i.get<CategoryController>())),
     Bind.singleton((i) => UsersController()),
     Bind.singleton((i) => CartController(i.get<ProductController>())),
+    Bind.singleton((i) => LikedProductsController(i.get<ProductController>()))
   ];
 
   @override
@@ -55,6 +58,11 @@ class AppModule extends Module {
       productController: Modular.get<ProductController>(),
       usersController: Modular.get<UsersController>(),
     )),
-
+    ChildRoute('/likes', child: (_, __) => LikedProductsPage(
+      usersController: Modular.get<UsersController>(),
+      productController: Modular.get<ProductController>(),
+      likedProductsController: Modular.get<LikedProductsController>(),
+    )),
   ];
 }
+

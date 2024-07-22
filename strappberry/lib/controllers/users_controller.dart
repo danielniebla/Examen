@@ -11,14 +11,14 @@ class UsersController {
   late final encrypt.Key _key;
 
   UsersController() {
-    _key = encrypt.Key.fromLength(32); // Clave secreta de 32 bytes
+    _key = encrypt.Key.fromLength(32); 
     _encrypter = encrypt.Encrypter(encrypt.AES(_key));
   }
 
   String _encryptPassword(String password) {
-    final iv = encrypt.IV.fromLength(16); // Genera un IV de 16 bytes
+    final iv = encrypt.IV.fromLength(16); 
     final encrypted = _encrypter.encrypt(password, iv: iv);
-    return '${iv.base64}:${encrypted.base64}'; // Guarda el IV junto con el texto cifrado
+    return '${iv.base64}:${encrypted.base64}'; 
   }
 
   String _decryptPassword(String encryptedPassword) {
@@ -32,7 +32,6 @@ class UsersController {
     final prefs = await SharedPreferences.getInstance();
     final usersString = prefs.getStringList(usersKey);
     if (usersString == null || usersString.isEmpty) {
-      // Datos predeterminados si no hay datos en SharedPreferences
       return [
         Users(id: 1, name: 'admin', email: 'admin@example.com', password: _encryptPassword('123'), isAdmin: true),
         Users(id: 2, name: 'olaph', email: 'hola@hola.com', password: _encryptPassword('123'), isAdmin: false),

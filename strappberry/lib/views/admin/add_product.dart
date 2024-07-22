@@ -24,6 +24,7 @@ class AddProductPage extends StatefulWidget {
   @override
   _AddProductPageState createState() => _AddProductPageState();
 }
+
 class _AddProductPageState extends State<AddProductPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
@@ -32,21 +33,24 @@ class _AddProductPageState extends State<AddProductPage> {
   int? _selectedCategory;
   bool _isNewCategory = false;
   final List<Category> _categories = [];
-  late Users user;
+  Users? _user;  // Cambia a Users?
 
-  @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-      final Users? user = await widget.usersController.getCurrentUser();
-    if (user == null) {
-      Navigator.pushReplacementNamed(context, '/login');
-    } 
-  }
-  
   @override
   void initState() {
     super.initState();
     _loadCategories();
+    _initializeUser();
+  }
+
+  Future<void> _initializeUser() async {
+    final user = await widget.usersController.getCurrentUser();
+    if (user == null) {
+      Navigator.pushReplacementNamed(context, '/login');
+    } else {
+      setState(() {
+        _user = user;
+      });
+    }
   }
 
   Future<void> _loadCategories() async {
@@ -55,15 +59,6 @@ class _AddProductPageState extends State<AddProductPage> {
       _categories.clear();
       _categories.addAll(categories);
     });
-  }
-
-  @override
-  void dispose() {
-    _newCategoryController.dispose();
-    _nameController.dispose();
-    _priceController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
   }
 
   void _addProduct() async {
@@ -75,10 +70,10 @@ class _AddProductPageState extends State<AddProductPage> {
       if (_isNewCategory) {
         if (_newCategoryController.text.isNotEmpty) {
           final newCategory = NewCategory(
-            id:null,
+            id: null,
             name: _newCategoryController.text,
           );
-          final Category newCategoryResponse = await widget.categoryController.addCategory(newCategory);  
+          final newCategoryResponse = await widget.categoryController.addCategory(newCategory);
 
           setState(() {
             _categories.add(newCategoryResponse);
@@ -87,24 +82,23 @@ class _AddProductPageState extends State<AddProductPage> {
             _newCategoryController.clear();
           });
         }
-      } 
-      if(user.isAdmin) {
+      }
+
+      if (_user != null && _user!.isAdmin) {
         final newProduct = NewProduct(
-          id: null, // Unique ID for the new product
+          id: null,
           name: _nameController.text,
-          imageUrl: 'assets/logo.png', 
+          imageUrl: 'assets/logo.png',
           price: double.tryParse(_priceController.text) ?? 0.0,
           description: _descriptionController.text,
           categoryId: _selectedCategory ?? 0,
-          sellerId: user.id
+          sellerId: _user!.id,
         );
 
-        widget.productController.addProduct(newProduct);
-
+        await widget.productController.addProduct(newProduct);
+        Navigator.pop(context);
       }
 
-
-      Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please fill all fields and select a category')),
@@ -132,7 +126,6 @@ class _AddProductPageState extends State<AddProductPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (snapshot.hasData) {
-
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(

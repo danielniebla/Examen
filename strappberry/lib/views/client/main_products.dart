@@ -24,16 +24,15 @@ class MainProductsPage extends StatefulWidget {
 }
 
 class _MainProductsPageState extends State<MainProductsPage> {
-  late Future<Users?> _currentUserFuture; // Variable para almacenar el Future del usuario
-  late Future<List<Category>> _categoriesFuture; // Variable para almacenar el Future de categorías
-  late Future<List<Product>> _productsFuture; // Variable para almacenar el Future de productos
-  Category? _selectedCategory; // Variable para almacenar la categoría seleccionada
+  late Future<Users?> _currentUserFuture;
+  late Future<List<Category>> _categoriesFuture;
+  late Future<List<Product>> _productsFuture; 
+  Category? _selectedCategory; 
   int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    // Inicializar los Futures
     _currentUserFuture = widget.usersController.getCurrentUser();
     _categoriesFuture = widget.categoryController.getCategories();
     _productsFuture = widget.productController.getProducts();
@@ -50,11 +49,11 @@ class _MainProductsPageState extends State<MainProductsPage> {
     setState(() {
       _currentIndex = index;
       if (index == 0) {
-        // Reiniciar filtro al ir a la pestaña Home
         _selectedCategory = null;
         _productsFuture = widget.productController.getProducts();
+      }else if (index == 1) {
+        Navigator.pushNamed(context, '/likes');
       }
-      // Aquí podrías agregar lógica adicional para otras pestañas si es necesario
     });
   }
 
@@ -104,7 +103,6 @@ class _MainProductsPageState extends State<MainProductsPage> {
             final categories = categorySnapshot.data!;
             return Column(
               children: [
-                // Barra de categorías horizontal
                 Container(
                   height: 60,
                   child: SingleChildScrollView(
@@ -133,7 +131,6 @@ class _MainProductsPageState extends State<MainProductsPage> {
                     ),
                   ),
                 ),
-                // Grid de productos
                 Expanded(
                   child: FutureBuilder<List<Product>>(
                     future: _productsFuture,
@@ -156,6 +153,8 @@ class _MainProductsPageState extends State<MainProductsPage> {
                             final product = products[index];
                             return GestureDetector(
                               onTap: () {
+                                widget.productController.setInstance(product);
+                                print('aqui si llego');
                                 Navigator.pushNamed(context, '/productDetails');
                               },
                               child: Card(

@@ -20,7 +20,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
-  bool isAdmin = false; // Estado inicial del checkbox
+  bool isAdmin = false;
 
   @override
   void dispose() {
@@ -38,7 +38,7 @@ class _RegisterPageState extends State<RegisterPage> {
         _confirmController.text.isNotEmpty &&
         _passwordController.text == _confirmController.text) {
       final newUser = NewUsers(
-        id: null, // Generar un ID único
+        id: null, 
         name: _nameController.text,
         email: _emailController.text,
         password: _passwordController.text,
@@ -46,7 +46,7 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       widget.usersController.register(newUser);
-      Navigator.pop(context); // Regresar a la página de inicio de sesión o donde se considere adecuado
+      Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Por favor, complete todos los campos correctamente')),
@@ -64,20 +64,18 @@ class _RegisterPageState extends State<RegisterPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Bloque superior de 19% de la altura
             Container(
               height: screenHeight * 0.19,
               width: double.infinity,
               child: Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.21), // 21% de padding en el eje x, responsive por porcentajes
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.21), 
                   child: const Image(
                     image: AssetImage('assets/logo.png'),
                   ),
                 ),
               ),
             ),
-            // Bloque inferior de 81% de la altura
             Container(
               width: double.infinity,
               height: screenHeight * 0.81,
@@ -91,11 +89,10 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
                 child: Padding(
-                  padding: EdgeInsets.only(top: screenHeight * 0.05), // Ajustar el padding superior
+                  padding: EdgeInsets.only(top: screenHeight * 0.05),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch, // Asegura que los elementos se estiren horizontalmente
+                    crossAxisAlignment: CrossAxisAlignment.stretch, 
                     children: [
-                      // Nombre
                       TextField(
                         controller: _nameController,
                         decoration: InputDecoration(
@@ -108,7 +105,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 16.0),
 
-                      // Email
                       TextField(
                         controller: _emailController,
                         decoration: InputDecoration(
@@ -121,7 +117,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 16.0),
 
-                      // Contraseña
                       TextField(
                         controller: _passwordController,
                         obscureText: true,
@@ -135,7 +130,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 16.0),
 
-                      // Confirmar Contraseña
                       TextField(
                         controller: _confirmController,
                         obscureText: true,
@@ -149,7 +143,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 16.0),
 
-                      // Checkbox Administrador
                       CheckboxListTile(
                         title: const Text('Administrador'),
                         value: isAdmin,
@@ -161,7 +154,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 16.0),
 
-                      // Botón de Registro
                       ElevatedButton(
                         onPressed: _registerUser,
                         style: ElevatedButton.styleFrom(
@@ -176,7 +168,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 16.0),
                       const Spacer(),
-                      // Enlace para iniciar sesión
                       const Text(
                         '¿Ya tienes cuenta?',
                         textAlign: TextAlign.center,

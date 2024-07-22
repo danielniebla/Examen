@@ -64,7 +64,6 @@ class _LoginPageState extends State<LoginPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Bloque superior de 29% de la altura
             Container(
               height: screenHeight * 0.29,
               width: double.infinity,
@@ -77,7 +76,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            // Bloque inferior de 71% de la altura
             Container(
               width: double.infinity,
               height: screenHeight * 0.71,
@@ -95,7 +93,6 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Campo de Email
                       TextField(
                         controller: _emailController,
                         decoration: const InputDecoration(
@@ -107,7 +104,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 16.0),
 
-                      // Campo de Contraseña
                       TextField(
                         controller: _passwordController,
                         obscureText: true,
@@ -120,7 +116,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 16.0),
 
-                      // Botón de Login
                       ElevatedButton(
                         onPressed: handleLogin,
                         style: ElevatedButton.styleFrom(
@@ -130,7 +125,6 @@ class _LoginPageState extends State<LoginPage> {
                         child: const Text('Iniciar Sesión'),
                       ),
                        const Spacer(),
-                      // Texto de registro
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -140,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.pushNamed(context, '/register'); // Navegar a la página de registro
+                              Navigator.pushNamed(context, '/register'); 
                             },
                             child: const Text(
                               'Regístrate',
@@ -153,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20.0), // Espacio adicional al final
+                      const SizedBox(height: 20.0), 
                     ],
                   ),
                 ),

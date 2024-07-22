@@ -12,7 +12,6 @@ class CartController {
     final prefs = await SharedPreferences.getInstance();
     final cartString = prefs.getStringList(cartKey);
     if (cartString == null || cartString.isEmpty) {
-      // Devuelve datos iniciales si no hay datos en SharedPreferences
       return [
         CartItem(id: 1, userId: 2, productId: 1, quantity: 4),
         CartItem(id: 2, userId: 2, productId: 2, quantity: 2),
@@ -39,7 +38,6 @@ class CartController {
 
  Future<void> addToCart(NewCartItem newCartItem) async {
     final currentCartItems = await _loadCartItems();
-    // Generar un nuevo ID para el nuevo cartItem
     final newId = (currentCartItems.isNotEmpty) ? currentCartItems.last.id + 1 : 1;
     
     final cartItem = CartItem(
@@ -67,26 +65,20 @@ class CartController {
     List<CartProduct> cartProducts = [];
     
     for (var cartItem in productsUsers) {
-      // Obtener detalles del producto
       final product = await productController.getProductById(cartItem.productId);
-      
-      if (product.isNotEmpty) {
-        final productDetails = product.first; // Asumiendo que getProductById devuelve una lista
         
-        // Crear un objeto CartProduct
         final cartProduct = CartProduct(
-          id: productDetails.id,
-          name: productDetails.name,
-          imageUrl: productDetails.imageUrl,
-          price: productDetails.price,
-          description: productDetails.description,
-          categoryId: productDetails.categoryId,
-          sellerId: productDetails.sellerId,
-          quantity: cartItem.quantity, // Usar la cantidad del cartItem
+          id: product.id,
+          name: product.name,
+          imageUrl: product.imageUrl,
+          price: product.price,
+          description: product.description,
+          categoryId: product.categoryId,
+          sellerId: product.sellerId,
+          quantity: cartItem.quantity, 
         );
         
         cartProducts.add(cartProduct);
-      }
     }
     
     return cartProducts;
@@ -96,7 +88,6 @@ class CartController {
     final index = currentCartItems.indexWhere((item) => item.productId == productId);
 
     if (index != -1) {
-      // Actualizar cantidad del producto en el carrito
       final cartItem = currentCartItems[index];
       final newQuantity = cartItem.quantity + delta;
       if (newQuantity > 0) {
@@ -107,7 +98,6 @@ class CartController {
           quantity: newQuantity,
         );
       } else {
-        // Eliminar el ítem si la cantidad es 0 o menor
         currentCartItems.removeAt(index);
       }
       await _saveCartItems(currentCartItems);

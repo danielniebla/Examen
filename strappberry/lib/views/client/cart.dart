@@ -46,10 +46,8 @@ class _CartPageState extends State<CartPage> {
   void _updateQuantity(CartProduct product, int delta) async {
     if (delta == 0) return;
 
-    // Actualizar la cantidad en el controlador
     await widget.cartController.updateQuantity(product.id, delta);
 
-    // Recargar los datos del carrito
     final user = await widget.usersController.getCurrentUser();
     if (user != null) {
       setState(() {
@@ -57,7 +55,6 @@ class _CartPageState extends State<CartPage> {
       });
     }
 
-    // Actualizar el estado local
     setState(() {
       productQuantities[product.id] = (productQuantities[product.id] ?? product.quantity) + delta;
       if (productQuantities[product.id]! <= 0) {
@@ -75,6 +72,9 @@ class _CartPageState extends State<CartPage> {
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: AppColors.primaryColor,
+        iconTheme: IconThemeData(
+          color: Colors.white, 
+        ),
       ),
       backgroundColor: Colors.white,
       body: Padding(
@@ -107,7 +107,6 @@ class _CartPageState extends State<CartPage> {
                                 color: AppColors.secondaryColor,
                                 child: Row(
                                   children: [
-                                    // Product Image
                                     Container(
                                       padding: EdgeInsets.all(8.0),
                                       child: Image.asset(
@@ -117,7 +116,6 @@ class _CartPageState extends State<CartPage> {
                                         fit: BoxFit.cover,
                                       ),
                                     ),
-                                    // Product Details
                                     Expanded(
                                       child: Padding(
                                         padding: const EdgeInsets.all(8.0),
@@ -126,39 +124,51 @@ class _CartPageState extends State<CartPage> {
                                           children: [
                                             Text(
                                               product.name,
-                                              style: TextStyle(
+                                              style:  TextStyle(
                                                 color: Colors.black,
                                                 fontSize: 16.0,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                            Text(
-                                              '\$${product.price.toStringAsFixed(2)}',
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 14.0,
-                                              ),
-                                            ),
                                             SizedBox(height: 8.0),
-                                            // Quantity Control
                                             Row(
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
-                                                IconButton(
-                                                  icon: Icon(Icons.remove, color: AppColors.iconsColor),
-                                                  onPressed: () {
-                                                    _updateQuantity(product, -1);
-                                                  },
-                                                ),
                                                 Text(
-                                                  quantity.toString(),
-                                                  style: TextStyle(color: AppColors.primaryColor),
+                                                  '\$${product.price.toStringAsFixed(2)}',
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 16.0,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                                 ),
-                                                IconButton(
-                                                  icon: Icon(Icons.add, color: AppColors.iconsColor),
-                                                  onPressed: () {
-                                                    _updateQuantity(product, 1);
-                                                  },
+                                                SizedBox(width: 8.0), 
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.circular(10.0),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                      IconButton(
+                                                        icon: Icon(Icons.remove, color: AppColors.iconsColor),
+                                                        onPressed: () {
+                                                          _updateQuantity(product, -1);
+                                                        },
+                                                      ),
+                                                      Text(
+                                                        quantity.toString(),
+                                                        style: TextStyle(color: AppColors.primaryColor),
+                                                      ),
+                                                      IconButton(
+                                                        icon: Icon(Icons.add, color: AppColors.iconsColor),
+                                                        onPressed: () {
+                                                          _updateQuantity(product, 1);
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                               ],
                                             ),
@@ -191,7 +201,6 @@ class _CartPageState extends State<CartPage> {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            // Handle checkout logic
                           },
                           style: ElevatedButton.styleFrom(
                             primary: AppColors.primaryColor,

@@ -70,7 +70,7 @@ class ProductController {
   Future<void> addProduct(NewProduct product) async {
     final currentProducts = await _loadProducts();
     currentProducts.add(Product(
-        id: (currentProducts.isNotEmpty)? currentProducts.length +1:1, // Unique ID for the new product
+        id: (currentProducts.isNotEmpty)? currentProducts.length +1:1, 
         name: product.name,
         imageUrl: product.imageUrl, 
         price:  product.price,
@@ -86,25 +86,25 @@ class ProductController {
     final productString = '${product.id},${product.name},${product.imageUrl},${product.price},${product.description},${product.categoryId},${product.sellerId}';
     prefs.setString(detailsKey, productString);
   }
-  Future<List<Product>> getProductDetails() async {
+  Future<Product?> getProductDetails() async {
     final prefs = await SharedPreferences.getInstance();
     final productsString = prefs.getStringList(detailsKey);
+    
     if (productsString == null || productsString.isEmpty) {
-      return [];
+      return null; 
     }
-    return productsString.map((productString) {
-      final data = productString.split(',');
-      return Product(
-        id: int.parse(data[0]) ,
-        name: data[1],
-        imageUrl: data[2],
-        price: double.parse(data[3]),
-        description: data[4],
-        categoryId: int.parse(data[5]),
-        sellerId: int.parse(data[6])
-      );
-    }).toList();
-
+    
+    final data = productsString.first.split(',');
+    print('estuve aqui');
+    return Product(
+      id: int.parse(data[0]),
+      name: data[1],
+      imageUrl: data[2],
+      price: double.parse(data[3]),
+      description: data[4],
+      categoryId: int.parse(data[5]),
+      sellerId: int.parse(data[6]),
+    );
   }
 
   Future<void> removeProduct(int id) async {
@@ -132,9 +132,9 @@ class ProductController {
     final products = await _loadProducts();
     return products.where((product) => product.sellerId == id).toList();
   }
-  Future<List<Product>> getProductById(int id) async {
+  Future<Product> getProductById(int id) async {
     final products = await _loadProducts();
-    return products.where((product) => product.id == id).toList();
+    return products.firstWhere((product) => product.id == id);
   }
 
   Future<List<Product>> getProductByCategory(int id) async {

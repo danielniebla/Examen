@@ -81,9 +81,12 @@ class _ProductListPageState extends State<ProductListPage> {
                       final product = products[index];
                       return Card(
                         color: AppColors.shadowColor,
-                        child: Column(
+                        child: Padding(
+                          padding:EdgeInsets.all(8.0) ,
+                          child: Column(
                           children: [
                             Image.asset(product.imageUrl),
+                            Spacer(),
                             Text(
                               product.name,
                               style: const TextStyle(color: AppColors.primaryColor),
@@ -110,8 +113,10 @@ class _ProductListPageState extends State<ProductListPage> {
                                 ),
                               ],
                             ),
+                            SizedBox(height: 16.0),
                           ],
                         ),
+                        )
                       );
                     },
                   );
