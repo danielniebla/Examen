@@ -10,6 +10,14 @@ class CartItem {
     required this.productId,
     required this.quantity,
   });
+  CartItem copyWith({int? id, int? userId, int? productId, int? quantity}) {
+    return CartItem(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      productId: productId ?? this.productId,
+      quantity: quantity ?? this.quantity,
+    );
+  }
 }
 
 class NewCartItem {

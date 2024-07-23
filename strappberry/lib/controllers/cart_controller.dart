@@ -35,19 +35,36 @@ class CartController {
     }).toList();
     prefs.setStringList(cartKey, cartString);
   }
-
- Future<void> addToCart(NewCartItem newCartItem) async {
+  
+  Future<void> addToCart(NewCartItem newCartItem) async {
     final currentCartItems = await _loadCartItems();
-    final newId = (currentCartItems.isNotEmpty) ? currentCartItems.last.id + 1 : 1;
-    
-    final cartItem = CartItem(
-      id: newId,
-      userId: newCartItem.userId,
-      productId: newCartItem.productId,
-      quantity: newCartItem.quantity,
+
+    // Buscar si el producto ya está en el carrito para el mismo usuario
+    final existingCartItemIndex = currentCartItems.indexWhere(
+      (item) => item.userId == newCartItem.userId && item.productId == newCartItem.productId,
     );
-    
-    currentCartItems.add(cartItem);
+
+    if (existingCartItemIndex != -1) {
+      // Si el producto ya está en el carrito, incrementar la cantidad
+      final existingCartItem = currentCartItems[existingCartItemIndex];
+      currentCartItems[existingCartItemIndex] = existingCartItem.copyWith(
+        quantity: existingCartItem.quantity + newCartItem.quantity,
+      );
+    } else {
+      // Si el producto no está en el carrito, agregar un nuevo ítem
+      final newId = (currentCartItems.isNotEmpty) ? currentCartItems.last.id! + 1 : 1;
+
+      final cartItem = CartItem(
+        id: newId,
+        userId: newCartItem.userId,
+        productId: newCartItem.productId,
+        quantity: newCartItem.quantity,
+      );
+
+      currentCartItems.add(cartItem);
+    }
+
+    // Guardar los ítems actualizados en el almacenamiento persistente
     await _saveCartItems(currentCartItems);
   }
 

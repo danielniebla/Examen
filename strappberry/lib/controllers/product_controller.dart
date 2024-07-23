@@ -87,24 +87,33 @@ class ProductController {
     prefs.setString(detailsKey, productString);
   }
   Future<Product?> getProductDetails() async {
-    final prefs = await SharedPreferences.getInstance();
-    final productsString = prefs.getStringList(detailsKey);
-    
-    if (productsString == null || productsString.isEmpty) {
-      return null; 
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final productString = prefs.getString(detailsKey);
+
+      if (productString == null) {
+        return null; // No hay datos disponibles
+      }
+
+      final data = productString.split(',');
+
+      if (data.length < 7) {
+        throw FormatException('Datos del producto no están completos.');
+      }
+
+      return Product(
+        id: int.parse(data[0]),
+        name: data[1],
+        imageUrl: data[2],
+        price: double.parse(data[3]),
+        description: data[4],
+        categoryId: int.parse(data[5]),
+        sellerId: int.parse(data[6]),
+      );
+    } catch (e) {
+      print('Error en getProductDetails: $e');
+      throw Exception('Error al obtener el producto: ${e.toString()}');
     }
-    
-    final data = productsString.first.split(',');
-    print('estuve aqui');
-    return Product(
-      id: int.parse(data[0]),
-      name: data[1],
-      imageUrl: data[2],
-      price: double.parse(data[3]),
-      description: data[4],
-      categoryId: int.parse(data[5]),
-      sellerId: int.parse(data[6]),
-    );
   }
 
   Future<void> removeProduct(int id) async {

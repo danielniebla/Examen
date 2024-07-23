@@ -38,6 +38,12 @@ class LikedProductsController {
     prefs.setStringList(likedProductsKey, likedProductsString);
   }
 
+  Future<bool> isProductLiked(int userId, int productId) async {
+    final currentLikedProducts = await _loadLikedProducts();
+    return currentLikedProducts.any((likedProduct) => likedProduct.userId == userId && likedProduct.productId == productId);
+  }
+
+
   Future<void> addToLikedProducts(NewLikedProduct newLikedProduct) async {
     final currentLikedProducts = await _loadLikedProducts();
     final likedProduct = Likedproduct(
@@ -52,11 +58,15 @@ class LikedProductsController {
     }
   }
 
-  Future<void> removeFromLikedProducts(int productId) async {
-    final currentLikedProducts = await _loadLikedProducts();
-    currentLikedProducts.removeWhere((likedProduct) => likedProduct.productId == productId);
-    await _saveLikedProducts(currentLikedProducts);
-  }
+Future<void> removeFromLikedProducts(int productId) async {
+  final currentLikedProducts = await _loadLikedProducts();
+  
+  // Imprimir para depuración
+  print('Eliminando producto con ID: $productId');
+  
+  currentLikedProducts.removeWhere((likedProduct) => likedProduct.productId == productId);
+  await _saveLikedProducts(currentLikedProducts);
+}
 
   Future<List<Likeds>> getLikedProductsByUserId(int userId) async {
     final currentLikedProducts = await _loadLikedProducts();

@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import '../../controllers/product_controller.dart';
 import '../../controllers/users_controller.dart';
+import '../../controllers/cart_controller.dart';
 import '../../models/product_model.dart';
 import '../../models/users_model.dart';
+import '../../models/cart_model.dart'; // Asegúrate de tener la importación correcta para CartItem y NewCartItem
 import '../../utils/app_colors.dart';
 
 class DetailsPage extends StatefulWidget {
   final ProductController productController;
   final UsersController usersController;
+  final CartController cartController;
 
   const DetailsPage({
     Key? key,
     required this.productController,
     required this.usersController,
+    required this.cartController,
   }) : super(key: key);
 
   @override
@@ -140,37 +144,43 @@ class _DetailsPageState extends State<DetailsPage> {
                         ),
                         SizedBox(height: 16.0),
                         // Información del producto
-                        Center(
-                          child: Image.asset(
-                            product.imageUrl,
-                            height: 200,
-                            width: 200,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        SizedBox(height: 16.0),
-                        Text(
-                          product.name,
-                          style: TextStyle(
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryColor,
-                          ),
-                        ),
-                        SizedBox(height: 8.0),
-                        Text(
-                          '\$${product.price.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            color: AppColors.primaryColor,
-                          ),
-                        ),
-                        SizedBox(height: 16.0),
-                        Text(
-                          product.description,
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            color: Colors.black,
+                        _buildProductInfo(product!),
+                        // Botón "Agregar al carrito"
+                        Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: Center(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (userSnapshot.data != null) {
+                                  final newCartItem = NewCartItem(
+                                    id: null, // Asumimos que id será asignado automáticamente
+                                    userId: userSnapshot.data!.id,
+                                    productId: product.id,
+                                    quantity: 1, // Ajusta la cantidad según tu lógica
+                                  );
+
+                                  try {
+                                    await widget.cartController.addToCart(newCartItem);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Producto agregado al carrito')),
+                                    );
+                                  } catch (error) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Error al agregar el producto al carrito')),
+                                    );
+                                  }
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                primary: AppColors.primaryColor, // Color del botón
+                                padding: EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                              ),
+                              child: Text(
+                                'Agregar al carrito',
+                                style: TextStyle(fontSize: 18.0, color: Colors.white),
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -201,41 +211,44 @@ class _DetailsPageState extends State<DetailsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Imagen del producto
-                        Center(
-                          child: Image.asset(
-                            product.imageUrl,
-                            height: 200,
-                            width: 200,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        SizedBox(height: 16.0),
-                        // Nombre del producto
-                        Text(
-                          product.name,
-                          style: TextStyle(
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryColor,
-                          ),
-                        ),
-                        SizedBox(height: 8.0),
-                        // Precio del producto
-                        Text(
-                          '\$${product.price.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            color: AppColors.primaryColor,
-                          ),
-                        ),
-                        SizedBox(height: 16.0),
-                        // Descripción del producto
-                        Text(
-                          product.description,
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            color: Colors.black,
+                        // Información del producto
+                        _buildProductInfo(product!),
+                        // Botón "Agregar al carrito"
+                        Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: Center(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (user != null) {
+                                  final newCartItem = NewCartItem(
+                                    id: null, // Asumimos que id será asignado automáticamente
+                                    userId: user.id!,
+                                    productId: product.id!,
+                                    quantity: 1, // Ajusta la cantidad según tu lógica
+                                  );
+
+                                  try {
+                                    await widget.cartController.addToCart(newCartItem);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Producto agregado al carrito')),
+                                    );
+                                  } catch (error) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Error al agregar el producto al carrito')),
+                                    );
+                                  }
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                primary: AppColors.primaryColor, // Color del botón
+                                padding: EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                              ),
+                              child: Text(
+                                'Agregar al carrito',
+                                style: TextStyle(fontSize: 18.0, color: Colors.white),
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -247,6 +260,50 @@ class _DetailsPageState extends State<DetailsPage> {
           );
         }
       },
+    );
+  }
+
+  Widget _buildProductInfo(Product product) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Center(
+          child: Container(
+            color: AppColors.shadowColor, // Color de fondo para la imagen
+            child: Image.asset(
+              product.imageUrl,
+              height: screenHeight * .4,
+              width: double.infinity,
+            ),
+          ),
+        ),
+        SizedBox(height: 16.0),
+        Text(
+          product.name,
+          style: TextStyle(
+            fontSize: 24.0,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryColor,
+          ),
+        ),
+        SizedBox(height: 8.0),
+        Text(
+          '\$${product.price.toStringAsFixed(2)}',
+          style: TextStyle(
+            fontSize: 20.0,
+            color: Colors.grey[600],
+          ),
+        ),
+        SizedBox(height: 16.0),
+        Text(
+          product.description,
+          style: TextStyle(
+            fontSize: 18.0,
+            color: Colors.black,
+          ),
+        ),
+      ],
     );
   }
 }

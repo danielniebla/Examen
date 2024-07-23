@@ -70,7 +70,9 @@ class _LikedProductsPageState extends State<LikedProductsPage> {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (snapshot.hasData) {
                     final likedProducts = snapshot.data!;
-                    if (likedProducts.isEmpty) { print('podria estar todo bien'); }
+                    if (likedProducts.isEmpty) {
+                      return Center(child: Text('No products found in favorites.'));
+                    }
                     return ListView.builder(
                       itemCount: likedProducts.length,
                       itemBuilder: (context, index) {
@@ -114,7 +116,10 @@ class _LikedProductsPageState extends State<LikedProductsPage> {
                                         onPressed: () async {
                                           final user = await widget.usersController.getCurrentUser();
                                           if (user != null) {
+                                            // Eliminar el producto de favoritos
                                             await widget.likedProductsController.removeFromLikedProducts(product.id);
+                                            
+                                            // Actualizar la lista de favoritos
                                             setState(() {
                                               _likedProductsFuture = widget.likedProductsController.getLikedProductsByUserId(user.id);
                                             });

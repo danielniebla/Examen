@@ -57,6 +57,7 @@ class AppModule extends Module {
     ChildRoute('/details', child: (_, __) => DetailsPage(
       productController: Modular.get<ProductController>(),
       usersController: Modular.get<UsersController>(),
+      cartController: Modular.get<CartController>(),
     )),
     ChildRoute('/likes', child: (_, __) => LikedProductsPage(
       usersController: Modular.get<UsersController>(),

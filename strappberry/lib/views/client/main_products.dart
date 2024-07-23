@@ -155,7 +155,7 @@ class _MainProductsPageState extends State<MainProductsPage> {
                               onTap: () {
                                 widget.productController.setInstance(product);
                                 print('aqui si llego');
-                                Navigator.pushNamed(context, '/productDetails');
+                                Navigator.pushNamed(context, '/details');
                               },
                               child: Card(
                                 color: AppColors.shadowColor,
