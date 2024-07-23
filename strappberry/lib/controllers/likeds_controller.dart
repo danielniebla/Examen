@@ -61,7 +61,6 @@ class LikedProductsController {
 Future<void> removeFromLikedProducts(int productId) async {
   final currentLikedProducts = await _loadLikedProducts();
   
-  // Imprimir para depuración
   print('Eliminando producto con ID: $productId');
   
   currentLikedProducts.removeWhere((likedProduct) => likedProduct.productId == productId);

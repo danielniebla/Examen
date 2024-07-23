@@ -4,7 +4,7 @@ import '../../controllers/users_controller.dart';
 import '../../controllers/cart_controller.dart';
 import '../../models/product_model.dart';
 import '../../models/users_model.dart';
-import '../../models/cart_model.dart'; // Asegúrate de tener la importación correcta para CartItem y NewCartItem
+import '../../models/cart_model.dart'; 
 import '../../utils/app_colors.dart';
 
 class DetailsPage extends StatefulWidget {
@@ -143,9 +143,7 @@ class _DetailsPageState extends State<DetailsPage> {
                           style: TextStyle(color: Colors.red, fontSize: 18.0),
                         ),
                         SizedBox(height: 16.0),
-                        // Información del producto
                         _buildProductInfo(product!),
-                        // Botón "Agregar al carrito"
                         Spacer(),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 16.0),
@@ -154,10 +152,10 @@ class _DetailsPageState extends State<DetailsPage> {
                               onPressed: () async {
                                 if (userSnapshot.data != null) {
                                   final newCartItem = NewCartItem(
-                                    id: null, // Asumimos que id será asignado automáticamente
+                                    id: null, 
                                     userId: userSnapshot.data!.id,
                                     productId: product.id,
-                                    quantity: 1, // Ajusta la cantidad según tu lógica
+                                    quantity: 1, 
                                   );
 
                                   try {
@@ -173,7 +171,7 @@ class _DetailsPageState extends State<DetailsPage> {
                                 }
                               },
                               style: ElevatedButton.styleFrom(
-                                primary: AppColors.primaryColor, // Color del botón
+                                primary: AppColors.primaryColor, 
                                 padding: EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
                               ),
                               child: Text(
@@ -211,9 +209,7 @@ class _DetailsPageState extends State<DetailsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Información del producto
                         _buildProductInfo(product!),
-                        // Botón "Agregar al carrito"
                         Spacer(),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 16.0),
@@ -222,10 +218,10 @@ class _DetailsPageState extends State<DetailsPage> {
                               onPressed: () async {
                                 if (user != null) {
                                   final newCartItem = NewCartItem(
-                                    id: null, // Asumimos que id será asignado automáticamente
+                                    id: null, 
                                     userId: user.id!,
                                     productId: product.id!,
-                                    quantity: 1, // Ajusta la cantidad según tu lógica
+                                    quantity: 1,
                                   );
 
                                   try {
@@ -241,7 +237,7 @@ class _DetailsPageState extends State<DetailsPage> {
                                 }
                               },
                               style: ElevatedButton.styleFrom(
-                                primary: AppColors.primaryColor, // Color del botón
+                                primary: AppColors.primaryColor, 
                                 padding: EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
                               ),
                               child: Text(
@@ -270,7 +266,7 @@ class _DetailsPageState extends State<DetailsPage> {
       children: [
         Center(
           child: Container(
-            color: AppColors.shadowColor, // Color de fondo para la imagen
+            color: AppColors.shadowColor, 
             child: Image.asset(
               product.imageUrl,
               height: screenHeight * .4,

@@ -116,10 +116,8 @@ class _LikedProductsPageState extends State<LikedProductsPage> {
                                         onPressed: () async {
                                           final user = await widget.usersController.getCurrentUser();
                                           if (user != null) {
-                                            // Eliminar el producto de favoritos
                                             await widget.likedProductsController.removeFromLikedProducts(product.id);
                                             
-                                            // Actualizar la lista de favoritos
                                             setState(() {
                                               _likedProductsFuture = widget.likedProductsController.getLikedProductsByUserId(user.id);
                                             });

@@ -92,7 +92,7 @@ class ProductController {
       final productString = prefs.getString(detailsKey);
 
       if (productString == null) {
-        return null; // No hay datos disponibles
+        return null; 
       }
 
       final data = productString.split(',');

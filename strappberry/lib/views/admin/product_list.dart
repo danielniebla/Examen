@@ -101,7 +101,6 @@ class _ProductListPageState extends State<ProductListPage> {
                                 IconButton(
                                   icon: const Icon(Icons.edit, color: AppColors.iconsColor),
                                   onPressed: () {
-                                    // Lógica para editar
                                   },
                                 ),
                                 IconButton(

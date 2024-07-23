@@ -33,7 +33,7 @@ class _AddProductPageState extends State<AddProductPage> {
   int? _selectedCategory;
   bool _isNewCategory = false;
   final List<Category> _categories = [];
-  Users? _user;  // Cambia a Users?
+  Users? _user;  
 
   @override
   void initState() {
@@ -133,7 +133,6 @@ class _AddProductPageState extends State<AddProductPage> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      // Logic to pick an image
                     },
                     child: Container(
                       height: 200,
